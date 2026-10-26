@@ -20,7 +20,7 @@ lib/features/<feature>/
     └── widgets/              # Feature-specific UI
 ```
 
-Create only the layers a feature needs. The alarms feature includes a small end-to-end example with an entity, repository contract, demo repository, Riverpod providers, and page. Home, lessons, vocabulary, and profile currently start with presentation pages.
+Create only the layers a feature needs. The alarms feature includes an entity, repository contract, demo repository, Riverpod providers, and page. Home and settings include API-backed repositories and providers. Lessons, vocabulary, and profile currently start with presentation pages.
 
 ## Dependency direction
 
@@ -38,6 +38,7 @@ Create only the layers a feature needs. The alarms feature includes a small end-
 - `app/router/app_router.dart`: route declarations and top-level navigation shell.
 - `app/theme/app_theme.dart`: design tokens and shared Material theme.
 - `core/network/api_client.dart`: shared Dio client provider.
+- `core/constants/app_constants.dart`: platform-aware API base URL and app constants.
 - `core/constants` and `core/errors`: app-wide values and error types.
 
 ## Adding a page
@@ -52,3 +53,9 @@ Most page additions therefore touch the feature and the centralized route table,
 ## State and navigation
 
 Use Riverpod providers for shared or asynchronous state. Keep ephemeral form and animation state local to widgets. Use GoRouter for deep links, nested feature routes, and the persistent indexed bottom-navigation branches.
+
+## Settings and runtime status
+
+The Profile branch contains a nested settings route. The settings feature requests `GET /api/status` through its own repository and provider, then presents backend health/version, authentication capability/session status, and OpenAI key presence.
+
+The backend status payload includes only a boolean for OpenAI configuration. Never return the key to the Flutter client. Authentication currently reports disabled and signed out until an auth flow is implemented.
