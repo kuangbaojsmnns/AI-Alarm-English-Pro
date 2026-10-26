@@ -21,4 +21,15 @@ class Alarm {
     final period = hour < 12 ? 'AM' : 'PM';
     return '$hour12:$minuteText $period';
   }
+
+  Alarm copyWith({bool? isEnabled}) {
+    return Alarm(
+      id: id,
+      hour: hour,
+      minute: minute,
+      schedule: schedule,
+      sound: sound,
+      isEnabled: isEnabled ?? this.isEnabled,
+    );
+  }
 }
