@@ -1,33 +1,127 @@
 # AI Alarm English Pro
 
-An AI-powered English learning alarm application for Windows. It pairs a gentle wake-up experience with short English practice tailored to the learner.
+> Wake up. Speak English. Learn with AI.
 
-## Development
+AI Alarm English Pro is an AI-powered English learning alarm application designed to transform the first few minutes after waking into an effective daily learning session.
 
-Requirements: Node.js 20 or newer.
+Users complete AI-generated English conversations, vocabulary practice, and pronunciation tasks before dismissing the alarm, building consistent language habits through intelligent interaction.
 
-```bash
-npm install
-npm run dev
+---
+
+## Features
+
+### Smart AI Alarm
+
+- Alarm that requires task completion before dismissal
+- Custom wake-up schedule
+- Multiple alarm profiles
+- Snooze management
+- Smart retry mechanism
+
+### AI English Conversation
+
+- Powered by OpenAI Responses API
+- Daily conversation topics
+- CEFR level adaptation (A1–C2)
+- Grammar correction
+- Vocabulary explanation
+- Pronunciation feedback (future)
+
+### Vocabulary Learning
+
+- Daily vocabulary goals
+- Review mode
+- AI-generated example sentences
+- Difficulty adjustment
+- Learning statistics
+
+### Learning Statistics
+
+- Learning streak
+- Alarm completion rate
+- Vocabulary progress
+- Conversation history
+- Weekly and monthly reports
+
+---
+
+## Technology Stack
+
+### Mobile
+
+- Flutter 3.35
+- Dart
+- Riverpod
+- go_router
+- Dio
+- freezed
+- json_serializable
+
+### Backend
+
+- FastAPI
+- SQLAlchemy 2.x
+- Alembic
+- SQLite
+- PostgreSQL (future)
+- JWT Authentication
+
+### AI
+
+- OpenAI Responses API
+
+### DevOps
+
+- Docker
+- Docker Compose
+- GitHub Actions
+
+---
+
+## Project Structure
+
+```text
+AI-Alarm-English-Pro
+├── app/
+├── server/
+├── docs/
+├── .github/
+├── docker-compose.yml
+├── README.md
+└── LICENSE
 ```
 
-This starts the Vite development server and opens the Electron desktop window.
+---
 
-Build the web UI and launch the built desktop shell with:
+## Roadmap
 
-```bash
-npm run build
-npm start
-```
+### v0.1.0
 
-## Project status
+- Project bootstrap
+- Flutter skeleton
+- FastAPI skeleton
+- Login
+- Home
+- OpenAI integration
 
-The current app is an early UI scaffold built with React, TypeScript, Vite, and Electron. The morning dashboard demonstrates a sample lesson, phrase reveal, lesson start state, and alarm toggle. Lesson content and alarm state are demo-only; Windows alarm scheduling, notifications, speech, and AI generation are not connected yet.
+### v0.2.0
 
-## Planned foundation
+- AI Alarm
+- Vocabulary Learning
+- Daily Tasks
 
-- Windows desktop shell with context isolation and a minimal preload bridge
-- Learner profile and persistent alarm settings
-- Reliable Windows alarm and notification behavior
-- Speech playback and level-aware lesson generation through a server-side API
-- Accessibility, localization, and quality checks
+### v0.3.0
+
+- AI Voice
+- Statistics Dashboard
+- Cloud Sync
+
+### v1.0.0
+
+- Production Release
+
+---
+
+## License
+
+Released under the MIT License.
