@@ -20,7 +20,7 @@ lib/features/<feature>/
     └── widgets/              # Feature-specific UI
 ```
 
-Create only the layers a feature needs. The alarms feature includes an entity, repository contract, demo repository, Riverpod providers, and page. Home and settings include API-backed repositories and providers. Lessons, vocabulary, and profile currently start with presentation pages.
+Create only the layers a feature needs. Alarms includes a domain entity, repository contract, SharedPreferences data implementation, Riverpod controller, and page. Home and settings include API-backed repositories and providers. Chat currently uses local in-memory demo conversations and replies. Lessons, vocabulary, and profile otherwise start with presentation pages.
 
 ## Dependency direction
 
@@ -56,6 +56,6 @@ Use Riverpod providers for shared or asynchronous state. Keep ephemeral form and
 
 ## Settings and runtime status
 
-The Profile branch contains a nested settings route. The settings feature requests `GET /api/status` through its own repository and provider, then presents backend health/version, authentication capability/session status, and OpenAI key presence.
+The Profile branch contains a nested settings route. The settings feature requests `GET /api/status` through its own repository and provider, then presents backend health/version, authentication capability/session status, and OpenAI key presence. It supports status refresh and copying the platform-specific API base URL.
 
-The backend status payload includes only a boolean for OpenAI configuration. Never return the key to the Flutter client. Authentication currently reports disabled and signed out until an auth flow is implemented.
+The backend status payload includes only a boolean for OpenAI configuration. Never return the key to the Flutter client. Authentication currently reports disabled and signed out until an auth flow is implemented. Chat replies are local demo content. Alarm definitions and enabled states are saved with `SharedPreferencesAsync`; system scheduling and notifications are not implemented.
