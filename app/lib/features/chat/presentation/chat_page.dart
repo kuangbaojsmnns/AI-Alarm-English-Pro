@@ -239,7 +239,7 @@ class _ChatPageState extends State<ChatPage> {
     _scrollToBottom();
 
     await Future<void>.delayed(const Duration(milliseconds: 550));
-    if (!mounted || conversation.id != _activeConversationId) return;
+    if (!mounted) return;
 
     setState(() {
       conversation.messages.add(
@@ -249,9 +249,11 @@ class _ChatPageState extends State<ChatPage> {
           isFromUser: false,
         ),
       );
-      _assistantIsTyping = false;
+      if (conversation.id == _activeConversationId) {
+        _assistantIsTyping = false;
+      }
     });
-    _scrollToBottom();
+    if (conversation.id == _activeConversationId) _scrollToBottom();
   }
 
   void _scrollToBottom() {
