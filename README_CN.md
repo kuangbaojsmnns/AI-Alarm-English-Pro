@@ -23,7 +23,11 @@ app/
 │       │   ├── data/
 │       │   ├── domain/
 │       │   └── presentation/
-│       ├── home/presentation/
+│       ├── home/
+│       │   ├── application/
+│       │   ├── data/
+│       │   ├── domain/
+│       │   └── presentation/
 │       ├── lessons/presentation/
 │       ├── profile/presentation/
 │       └── vocabulary/presentation/
@@ -38,7 +42,7 @@ server/
 .github/workflows/ci.yml
 ```
 
-客户端采用 **feature-first** 组织：每个业务模块独立维护页面与业务代码。闹钟模块提供了完整的分层样例；其他模块可在需要数据或业务逻辑时，直接在自身目录下增加 `application/`、`domain/`、`data/`，不需要改变全局目录。页面路由集中在 `app/router/app_router.dart`，全局主题在 `app/theme/`，通用组件与网络能力放在 `core/`。
+客户端采用 **feature-first** 组织：每个业务模块独立维护页面与业务代码。闹钟模块提供了分层数据样例，Home 模块提供了后端版本 API 的联调样例。页面路由集中在 `app/router/app_router.dart`，全局主题在 `app/theme/`，通用组件与网络能力放在 `core/`。
 
 更多模块边界和新增页面约定见 [app/ARCHITECTURE.md](app/ARCHITECTURE.md)。
 
@@ -56,7 +60,9 @@ flutter pub get
 flutter run
 ```
 
-目前已提供 Riverpod、GoRouter、Dio 基础设施和 Home、Alarms、Lessons、Words、Profile 五个演示页面。页面展示数据仍为演示内容，闹钟切换目前只保存在页面状态中。
+Home 页调用 `GET /api/version` 并显示后端名称与版本；连接失败时可点击 Retry。其余课程、词汇和统计内容仍为演示数据。
+
+默认 API 地址为 `http://localhost:8000/api`，配置位于 `app/lib/core/constants/app_constants.dart`。
 
 ## FastAPI 服务端
 
@@ -75,7 +81,8 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-健康检查地址：`http://127.0.0.1:8000/api/health`。
+- 健康检查：`http://127.0.0.1:8000/api/health`
+- 版本接口：`http://127.0.0.1:8000/api/version`
 
 ## Docker
 
@@ -90,4 +97,4 @@ docker run --rm -p 8000:8000 ai-alarm-english-pro-api
 
 ## CI 与后续开发
 
-GitHub Actions 会解析 Flutter 依赖、在客户端源码存在时运行静态分析和测试，并安装 Python 依赖、编译检查服务端代码。后续可加入 SQLAlchemy 数据模型、Alembic 迁移、pytest 测试、持久化闹钟、课程 API 和真实 Windows 闹钟集成。
+GitHub Actions 会解析 Flutter 依赖、运行客户端静态分析，并安装 Python 依赖、编译检查服务端代码。后续可加入 SQLAlchemy 数据模型、Alembic 迁移、pytest 测试、持久化闹钟、课程 API 和真实 Windows 闹钟集成。
