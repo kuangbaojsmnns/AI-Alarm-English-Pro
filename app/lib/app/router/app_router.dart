@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/alarms/presentation/alarms_page.dart';
+import '../../features/chat/presentation/chat_page.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/lessons/presentation/lessons_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
@@ -43,6 +44,12 @@ final GoRouter appRouter = GoRouter(
               pageBuilder: (context, state) => const NoTransitionPage(
                 child: LessonsPage(),
               ),
+              routes: [
+                GoRoute(
+                  path: 'chat',
+                  builder: (context, state) => const ChatPage(),
+                ),
+              ],
             ),
           ],
         ),
