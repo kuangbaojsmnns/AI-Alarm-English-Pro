@@ -5,6 +5,7 @@ import '../../features/alarms/presentation/alarms_page.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/lessons/presentation/lessons_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
+import '../../features/settings/presentation/settings_page.dart';
 import '../../features/vocabulary/presentation/vocabulary_page.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -62,6 +63,12 @@ final GoRouter appRouter = GoRouter(
               pageBuilder: (context, state) => const NoTransitionPage(
                 child: ProfilePage(),
               ),
+              routes: [
+                GoRoute(
+                  path: 'settings',
+                  builder: (context, state) => const SettingsPage(),
+                ),
+              ],
             ),
           ],
         ),
