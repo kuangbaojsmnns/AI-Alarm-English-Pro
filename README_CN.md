@@ -47,7 +47,7 @@ flutter run --dart-define=API_BASE_URL=http://192.168.1.25:8000/api
 
 ### M1.3 功能骨架
 
-- **AI Chat**：从 Lessons 页面进入；会话列表、会话切换、新建会话、输入框和消息气泡均可交互。当前会话仅保存在运行内存中，回复由本地演示逻辑生成，尚未连接 OpenAI。
+- **AI Chat**：从 Lessons 页面进入；会话列表、会话切换、新建会话、输入框和消息气泡均可交互。会话只在 Chat 页面打开期间保留，退出页面后不保存；回复由本地演示逻辑生成，尚未连接 OpenAI。
 - **Settings**：Profile → App settings 中分组显示 API 在线状态、后端名称/版本、登录能力、OpenAI key 配置状态和 API Base URL；支持重新检测与复制地址。
 - **Alarms**：用 `SharedPreferencesAsync` 在本地保存闹钟列表和开关；首次启动写入默认闹钟。此存储适合当前简单设置骨架，不承担关键闹钟定时任务。
 
