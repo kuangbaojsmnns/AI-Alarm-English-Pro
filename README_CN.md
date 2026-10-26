@@ -31,6 +31,7 @@ server/
 │   ├── api/
 │   ├── core/
 │   └── main.py
+├── .dockerignore
 ├── .env.example
 ├── Dockerfile
 └── requirements.txt
@@ -94,10 +95,10 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ```bash
 docker build -f server/Dockerfile -t ai-alarm-english-pro-api ./server
-docker run --rm -p 8000:8000 --env OPENAI_API_KEY=<your-key> ai-alarm-english-pro-api
+docker run --rm -p 8000:8000 --env-file server/.env ai-alarm-english-pro-api
 ```
 
-容器使用 `uvicorn app.main:app --host 0.0.0.0 --port 8000` 启动。
+`server/.dockerignore` 会排除本机 `.env`，密钥只在容器运行时传入。容器使用 `uvicorn app.main:app --host 0.0.0.0 --port 8000` 启动。
 
 ## CI 与后续开发
 
