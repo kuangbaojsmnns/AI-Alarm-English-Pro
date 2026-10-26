@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,6 +16,14 @@ class SettingsPage extends ConsumerWidget {
     } on Object {
       // The provider stores the error and the page renders its unavailable state.
     }
+  }
+
+  Future<void> _copyApiBaseUrl(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: AppConstants.apiBaseUrl));
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('API Base URL copied')),
+    );
   }
 
   @override
@@ -37,37 +46,68 @@ class SettingsPage extends ConsumerWidget {
                   tooltip: 'Back',
                 ),
                 const SizedBox(width: 4),
-                Text('Settings & status', style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  'Settings & status',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ],
             ),
             const SizedBox(height: 18),
-            Text(
-              'SERVICE STATUS',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    letterSpacing: 1.1,
-                  ),
-            ),
+            const _SectionTitle('CONNECTION'),
             const SizedBox(height: 10),
             status.when(
               loading: () => const _StatusCard(
                 icon: Icons.cloud_sync_outlined,
-                title: 'Backend',
+                title: 'API status',
                 value: 'Checking…',
                 detail: 'Requesting the live service status.',
               ),
               error: (error, stackTrace) => _StatusCard(
                 icon: Icons.cloud_off_outlined,
-                title: 'Backend',
+                title: 'API status',
                 value: 'Unavailable',
-                detail: 'Could not reach ${AppConstants.apiBaseUrl}.',
+                detail: 'Could not reach the configured backend.',
                 color: colors.error,
                 action: TextButton(
                   onPressed: () => ref.invalidate(systemStatusProvider),
                   child: const Text('Retry'),
                 ),
               ),
-              data: (value) => _BackendStatusCard(status: value),
+              data: (value) => Column(
+                children: [
+                  _StatusCard(
+                    icon: value.backendOnline
+                        ? Icons.cloud_done_outlined
+                        : Icons.cloud_off_outlined,
+                    title: 'API status',
+                    value: value.backendOnline ? 'Online' : 'Offline',
+                    detail: 'The backend status endpoint responded.',
+                    color: value.backendOnline ? colors.primary : colors.error,
+                  ),
+                  const SizedBox(height: 10),
+                  _StatusCard(
+                    icon: Icons.info_outline_rounded,
+                    title: 'Backend version',
+                    value: 'v${value.backendVersion}',
+                    detail: value.backendName,
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(height: 10),
+            _StatusCard(
+              icon: Icons.link_rounded,
+              title: 'API Base URL',
+              value: AppConstants.apiBaseUrl,
+              detail: 'Override with --dart-define=API_BASE_URL=<url>.',
+              action: IconButton(
+                onPressed: () => _copyApiBaseUrl(context),
+                icon: const Icon(Icons.copy_rounded),
+                tooltip: 'Copy API Base URL',
+              ),
+            ),
+            const SizedBox(height: 22),
+            const _SectionTitle('ACCOUNT'),
             const SizedBox(height: 10),
             status.when(
               loading: () => const _StatusCard(
@@ -84,6 +124,8 @@ class SettingsPage extends ConsumerWidget {
               ),
               data: (value) => _LoginStatusCard(status: value),
             ),
+            const SizedBox(height: 22),
+            const _SectionTitle('AI SERVICE'),
             const SizedBox(height: 10),
             status.when(
               loading: () => const _StatusCard(
@@ -100,29 +142,16 @@ class SettingsPage extends ConsumerWidget {
               ),
               data: (value) => _OpenAiStatusCard(status: value),
             ),
-            const SizedBox(height: 24),
-            Text(
-              'CONNECTION',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    letterSpacing: 1.1,
-                  ),
-            ),
-            const SizedBox(height: 10),
-            _StatusCard(
-              icon: Icons.link_rounded,
-              title: 'API base URL',
-              value: AppConstants.apiBaseUrl,
-              detail: 'Override with --dart-define=API_BASE_URL=<url>.',
-            ),
             const SizedBox(height: 20),
             OutlinedButton.icon(
               onPressed: () => ref.invalidate(systemStatusProvider),
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Refresh status'),
+              label: const Text('Recheck status'),
             ),
             const SizedBox(height: 8),
             Text(
-              'OpenAI credentials stay on the server. The app only receives whether a key is configured.',
+              'The app only receives whether an OpenAI key is configured. '
+              'It never receives the credential itself.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colors.onSurfaceVariant,
                   ),
@@ -130,26 +159,6 @@ class SettingsPage extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _BackendStatusCard extends StatelessWidget {
-  const _BackendStatusCard({required this.status});
-
-  final SystemStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final online = status.backendOnline;
-    final colors = Theme.of(context).colorScheme;
-
-    return _StatusCard(
-      icon: online ? Icons.cloud_done_outlined : Icons.cloud_off_outlined,
-      title: 'Backend',
-      value: online ? 'Online · v${status.backendVersion}' : 'Offline',
-      detail: status.backendName,
-      color: online ? colors.primary : colors.error,
     );
   }
 }
@@ -197,6 +206,22 @@ class _OpenAiStatusCard extends StatelessWidget {
       detail: status.openAiConfigured
           ? 'OPENAI_API_KEY is present on the server.'
           : 'Set OPENAI_API_KEY on the server to enable AI features.',
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            letterSpacing: 1.1,
+          ),
     );
   }
 }
