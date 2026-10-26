@@ -19,32 +19,25 @@ app/
 │   │   └── widgets/
 │   └── features/
 │       ├── alarms/
-│       │   ├── application/
-│       │   ├── data/
-│       │   ├── domain/
-│       │   └── presentation/
 │       ├── home/
-│       │   ├── application/
-│       │   ├── data/
-│       │   ├── domain/
-│       │   └── presentation/
-│       ├── lessons/presentation/
-│       ├── profile/presentation/
-│       └── vocabulary/presentation/
+│       ├── lessons/
+│       ├── profile/
+│       ├── settings/
+│       └── vocabulary/
 ├── analysis_options.yaml
 └── pubspec.yaml
 server/
 ├── app/
-│   ├── main.py
-│   └── api/routes.py
+│   ├── api/
+│   ├── core/
+│   └── main.py
+├── .env.example
 ├── Dockerfile
 └── requirements.txt
 .github/workflows/ci.yml
 ```
 
-客户端采用 **feature-first** 组织：每个业务模块独立维护页面与业务代码。闹钟模块提供了分层数据样例，Home 模块提供了后端版本 API 的联调样例。页面路由集中在 `app/router/app_router.dart`，全局主题在 `app/theme/`，通用组件与网络能力放在 `core/`。
-
-更多模块边界和新增页面约定见 [app/ARCHITECTURE.md](app/ARCHITECTURE.md)。
+客户端采用 **feature-first** 组织：每个业务模块独立维护页面与业务代码。页面路由集中在 `app/router/app_router.dart`，全局主题在 `app/theme/`，通用组件与网络能力放在 `core/`。更多模块边界见 [app/ARCHITECTURE.md](app/ARCHITECTURE.md)。
 
 ## 开发环境
 
@@ -60,29 +53,40 @@ flutter pub get
 flutter run
 ```
 
-Home 页调用 `GET /api/version` 并显示后端名称与版本；连接失败时可点击 Retry。其余课程、词汇和统计内容仍为演示数据。
+默认 API 地址会按平台选择：
 
-默认 API 地址为 `http://localhost:8000/api`，配置位于 `app/lib/core/constants/app_constants.dart`。
+- Android 模拟器：`http://10.0.2.2:8000/api`
+- Windows/macOS/Linux 桌面与 iOS 模拟器：`http://localhost:8000/api`
+
+Android/iOS 真机请将下面示例中的 IP 替换为开发电脑在同一局域网中的地址：
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://192.168.1.25:8000/api
+```
+
+Home 页调用 `GET /api/version`；Profile → App settings 可刷新查看后端状态、后端版本、登录状态和 OpenAI 配置状态。登录能力当前尚未接入。客户端只收到 OpenAI key 是否配置的布尔值，不会收到密钥。
 
 ## FastAPI 服务端
-
-在仓库根目录创建虚拟环境并安装依赖：
 
 ```powershell
 cd server
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+Copy-Item .env.example .env
 ```
 
-从 `server/` 目录启动开发服务：
+如需启用 OpenAI 功能，在本机 `server/.env` 中设置 `OPENAI_API_KEY`。此文件已被 Git 忽略，不要提交真实密钥。
+
+从 `server/` 目录启动服务。绑定 `0.0.0.0` 后，局域网中的真机才能访问；也请允许防火墙通过本机端口：
 
 ```bash
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 - 健康检查：`http://127.0.0.1:8000/api/health`
 - 版本接口：`http://127.0.0.1:8000/api/version`
+- 设置页状态接口：`http://127.0.0.1:8000/api/status`
 
 ## Docker
 
@@ -90,7 +94,7 @@ uvicorn app.main:app --reload
 
 ```bash
 docker build -f server/Dockerfile -t ai-alarm-english-pro-api ./server
-docker run --rm -p 8000:8000 ai-alarm-english-pro-api
+docker run --rm -p 8000:8000 --env OPENAI_API_KEY=<your-key> ai-alarm-english-pro-api
 ```
 
 容器使用 `uvicorn app.main:app --host 0.0.0.0 --port 8000` 启动。
