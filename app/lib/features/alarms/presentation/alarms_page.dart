@@ -1,50 +1,69 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/page_header.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AlarmsPage extends StatefulWidget {
+import '../../../core/widgets/page_header.dart';
+import '../application/alarm_providers.dart';
+import '../domain/entities/alarm.dart';
+
+class AlarmsPage extends ConsumerStatefulWidget {
   const AlarmsPage({super.key});
 
   @override
-  State<AlarmsPage> createState() => _AlarmsPageState();
+  ConsumerState<AlarmsPage> createState() => _AlarmsPageState();
 }
 
-class _AlarmsPageState extends State<AlarmsPage> {
-  bool _weekdayAlarmEnabled = true;
-  bool _weekendAlarmEnabled = false;
+class _AlarmsPageState extends ConsumerState<AlarmsPage> {
+  final Map<String, bool> _enabledOverrides = {};
 
   @override
   Widget build(BuildContext context) {
+    final alarms = ref.watch(alarmsProvider);
+
     return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          const PageHeader(
-            title: 'Your alarms',
-            subtitle: 'Make a little room for English each morning.',
+      child: alarms.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Could not load your alarms.'),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () => ref.invalidate(alarmsProvider),
+                  child: const Text('Try again'),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 24),
-          _AlarmTile(
-            time: '7:00',
-            period: 'AM',
-            schedule: 'Weekdays',
-            enabled: _weekdayAlarmEnabled,
-            onChanged: (value) => setState(() => _weekdayAlarmEnabled = value),
-          ),
-          const SizedBox(height: 12),
-          _AlarmTile(
-            time: '8:30',
-            period: 'AM',
-            schedule: 'Saturday, Sunday',
-            enabled: _weekendAlarmEnabled,
-            onChanged: (value) => setState(() => _weekendAlarmEnabled = value),
-          ),
-          const SizedBox(height: 18),
-          OutlinedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('Add alarm'),
-          ),
-        ],
+        ),
+        data: (items) => ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            const PageHeader(
+              title: 'Your alarms',
+              subtitle: 'Make a little room for English each morning.',
+            ),
+            const SizedBox(height: 24),
+            for (final alarm in items) ...[
+              _AlarmTile(
+                alarm: alarm,
+                enabled: _enabledOverrides[alarm.id] ?? alarm.isEnabled,
+                onChanged: (value) => setState(() {
+                  _enabledOverrides[alarm.id] = value;
+                }),
+              ),
+              const SizedBox(height: 12),
+            ],
+            const SizedBox(height: 6),
+            OutlinedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Add alarm'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -52,16 +71,12 @@ class _AlarmsPageState extends State<AlarmsPage> {
 
 class _AlarmTile extends StatelessWidget {
   const _AlarmTile({
-    required this.time,
-    required this.period,
-    required this.schedule,
+    required this.alarm,
     required this.enabled,
     required this.onChanged,
   });
 
-  final String time;
-  final String period;
-  final String schedule;
+  final Alarm alarm;
   final bool enabled;
   final ValueChanged<bool> onChanged;
 
@@ -71,8 +86,11 @@ class _AlarmTile extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         leading: const Icon(Icons.alarm_rounded, size: 30),
-        title: Text('$time $period', style: Theme.of(context).textTheme.headlineSmall),
-        subtitle: Text('$schedule · Gentle piano'),
+        title: Text(
+          alarm.formattedTime,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        subtitle: Text('${alarm.schedule} · ${alarm.sound}'),
         trailing: Switch(value: enabled, onChanged: onChanged),
       ),
     );
