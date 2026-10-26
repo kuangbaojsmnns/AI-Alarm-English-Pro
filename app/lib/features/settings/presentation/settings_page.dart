@@ -10,7 +10,11 @@ class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   Future<void> _refresh(WidgetRef ref) async {
-    await ref.refresh(systemStatusProvider.future);
+    try {
+      await ref.refresh(systemStatusProvider.future);
+    } on Object {
+      // The provider stores the error and the page renders its unavailable state.
+    }
   }
 
   @override
@@ -158,7 +162,7 @@ class _LoginStatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = !status.authenticationEnabled
-        ? 'Not connected'
+        ? 'Not enabled'
         : status.authenticated
             ? 'Signed in'
             : 'Signed out';
