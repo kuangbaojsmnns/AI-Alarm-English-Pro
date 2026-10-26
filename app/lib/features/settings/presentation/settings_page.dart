@@ -9,6 +9,10 @@ import '../domain/entities/system_status.dart';
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
+  Future<void> _refresh(WidgetRef ref) async {
+    await ref.refresh(systemStatusProvider.future);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final status = ref.watch(systemStatusProvider);
@@ -16,7 +20,7 @@ class SettingsPage extends ConsumerWidget {
 
     return SafeArea(
       child: RefreshIndicator(
-        onRefresh: () => ref.refresh(systemStatusProvider.future),
+        onRefresh: () => _refresh(ref),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
