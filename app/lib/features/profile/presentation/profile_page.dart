@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../../core/widgets/page_header.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -24,26 +26,28 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Card(
+          Card(
             child: Column(
               children: [
-                ListTile(
+                const ListTile(
                   leading: Icon(Icons.language_rounded),
                   title: Text('Learning language'),
                   subtitle: Text('English'),
                   trailing: Icon(Icons.chevron_right_rounded),
                 ),
-                Divider(height: 1, indent: 64),
-                ListTile(
+                const Divider(height: 1, indent: 64),
+                const ListTile(
                   leading: Icon(Icons.notifications_outlined),
                   title: Text('Notifications'),
                   trailing: Icon(Icons.chevron_right_rounded),
                 ),
-                Divider(height: 1, indent: 64),
+                const Divider(height: 1, indent: 64),
                 ListTile(
-                  leading: Icon(Icons.settings_outlined),
-                  title: Text('App settings'),
-                  trailing: Icon(Icons.chevron_right_rounded),
+                  leading: const Icon(Icons.settings_outlined),
+                  title: const Text('App settings'),
+                  subtitle: const Text('Backend, login and OpenAI status'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.push('/profile/settings'),
                 ),
               ],
             ),
