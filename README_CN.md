@@ -38,7 +38,7 @@ server/
 .github/workflows/ci.yml
 ```
 
-客户端采用 **feature-first** 组织：每个业务模块独立维护页面与业务代码。闹钟模块提供了完整的分层样例；其他模块可在需要数据或业务逻辑时，直接在自身目录下增加 `application/`、`domain/`、`data/`，不需要改变全局目录。页面路由集中在 `app/router/app_router.dart)，全局主题在 `app/theme/`，通用组件与网络能力放在 `core/`。
+客户端采用 **feature-first** 组织：每个业务模块独立维护页面与业务代码。闹钟模块提供了完整的分层样例；其他模块可在需要数据或业务逻辑时，直接在自身目录下增加 `application/`、`domain/`、`data/`，不需要改变全局目录。页面路由集中在 `app/router/app_router.dart`，全局主题在 `app/theme/`，通用组件与网络能力放在 `core/`。
 
 更多模块边界和新增页面约定见 [app/ARCHITECTURE.md](app/ARCHITECTURE.md)。
 
