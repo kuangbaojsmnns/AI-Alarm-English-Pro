@@ -2,43 +2,23 @@
 
 面向 Windows 的 AI 英语学习闹钟应用。客户端使用 **Flutter**，后端使用 **FastAPI**。
 
-## 项目结构
+## Flutter 客户端结构
 
 ```text
-app/
-├── lib/
-│   ├── main.dart
-│   ├── app/
-│   │   ├── app.dart
-│   │   ├── router/
-│   │   └── theme/
-│   ├── core/
-│   │   ├── constants/
-│   │   ├── errors/
-│   │   ├── network/
-│   │   └── widgets/
-│   └── features/
-│       ├── alarms/
-│       ├── home/
-│       ├── lessons/
-│       ├── profile/
-│       ├── settings/
-│       └── vocabulary/
-├── analysis_options.yaml
-└── pubspec.yaml
-server/
-├── app/
-│   ├── api/
-│   ├── core/
-│   └── main.py
-├── .dockerignore
-├── .env.example
-├── Dockerfile
-└── requirements.txt
-.github/workflows/ci.yml
+app/lib/
+├── app/                    # 应用、路由、主题
+├── core/                   # API 客户端、配置、共享组件
+└── features/
+    ├── alarms/             # 闹钟实体、持久化仓库、状态与页面
+    ├── chat/               # AI Chat 演示页面
+    ├── home/               # 首页与版本接口
+    ├── lessons/
+    ├── profile/
+    ├── settings/           # 后端/登录/OpenAI 状态
+    └── vocabulary/
 ```
 
-客户端采用 **feature-first** 组织：每个业务模块独立维护页面与业务代码。页面路由集中在 `app/router/app_router.dart`，全局主题在 `app/theme/`，通用组件与网络能力放在 `core/`。更多模块边界见 [app/ARCHITECTURE.md](app/ARCHITECTURE.md)。
+路由集中在 `app/router/app_router.dart`。更完整的模块约定见 [app/ARCHITECTURE.md](app/ARCHITECTURE.md)。
 
 ## 开发环境
 
@@ -59,13 +39,19 @@ flutter run
 - Android 模拟器：`http://10.0.2.2:8000/api`
 - Windows/macOS/Linux 桌面与 iOS 模拟器：`http://localhost:8000/api`
 
-Android/iOS 真机请将下面示例中的 IP 替换为开发电脑在同一局域网中的地址：
+Android/iOS 真机请把 IP 换成开发电脑的局域网地址：
 
 ```bash
 flutter run --dart-define=API_BASE_URL=http://192.168.1.25:8000/api
 ```
 
-Home 页调用 `GET /api/version`；Profile → App settings 可刷新查看后端状态、后端版本、登录状态和 OpenAI 配置状态。登录能力当前尚未接入。客户端只收到 OpenAI key 是否配置的布尔值，不会收到密钥。
+### M1.3 功能骨架
+
+- **AI Chat**：从 Lessons 页面进入；会话列表、会话切换、新建会话、输入框和消息气泡均可交互。当前会话仅保存在运行内存中，回复由本地演示逻辑生成，尚未连接 OpenAI。
+- **Settings**：Profile → App settings 中分组显示 API 在线状态、后端名称/版本、登录能力、OpenAI key 配置状态和 API Base URL；支持重新检测与复制地址。
+- **Alarms**：用 `SharedPreferencesAsync` 在本地保存闹钟列表和开关；首次启动写入默认闹钟。此存储适合当前简单设置骨架，不承担关键闹钟定时任务。
+
+登录尚未实现。OpenAI 状态只检查服务端是否存在非空 `OPENAI_API_KEY`，不验证 key 是否有效，也不会把 key 返回客户端。闹钟的系统定时触发和通知后续再接入。
 
 ## FastAPI 服务端
 
@@ -77,7 +63,7 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-如需启用 OpenAI 功能，在本机 `server/.env` 中设置 `OPENAI_API_KEY`。此文件已被 Git 忽略，不要提交真实密钥。
+如需显示 OpenAI 配置状态为已配置，在本机 `server/.env` 中设置 `OPENAI_API_KEY`。此文件已被 Git 忽略，不要提交真实密钥。
 
 从 `server/` 目录启动服务。绑定 `0.0.0.0` 后，局域网中的真机才能访问；也请允许防火墙通过本机端口：
 
@@ -98,8 +84,8 @@ docker build -f server/Dockerfile -t ai-alarm-english-pro-api ./server
 docker run --rm -p 8000:8000 --env-file server/.env ai-alarm-english-pro-api
 ```
 
-`server/.dockerignore` 会排除本机 `.env`，密钥只在容器运行时传入。容器使用 `uvicorn app.main:app --host 0.0.0.0 --port 8000` 启动。
+`server/.dockerignore` 会排除本机 `.env`；密钥只在容器运行时传入。
 
 ## CI 与后续开发
 
-GitHub Actions 会解析 Flutter 依赖、运行客户端静态分析，并安装 Python 依赖、编译检查服务端代码。后续可加入 SQLAlchemy 数据模型、Alembic 迁移、pytest 测试、持久化闹钟、课程 API 和真实 Windows 闹钟集成。
+GitHub Actions 会解析 Flutter 依赖、运行客户端静态分析，并安装 Python 依赖、编译检查服务端代码。下一步可接入 OpenAI 对话 API、实现身份认证，并增加可靠的操作系统闹钟与通知能力。
