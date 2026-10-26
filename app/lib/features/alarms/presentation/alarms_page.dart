@@ -5,18 +5,11 @@ import '../../../core/widgets/page_header.dart';
 import '../application/alarm_providers.dart';
 import '../domain/entities/alarm.dart';
 
-class AlarmsPage extends ConsumerStatefulWidget {
+class AlarmsPage extends ConsumerWidget {
   const AlarmsPage({super.key});
 
   @override
-  ConsumerState<AlarmsPage> createState() => _AlarmsPageState();
-}
-
-class _AlarmsPageState extends ConsumerState<AlarmsPage> {
-  final Map<String, bool> _enabledOverrides = {};
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final alarms = ref.watch(alarmsProvider);
 
     return SafeArea(
@@ -46,19 +39,21 @@ class _AlarmsPageState extends ConsumerState<AlarmsPage> {
               subtitle: 'Make a little room for English each morning.',
             ),
             const SizedBox(height: 24),
+            if (items.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Text('No alarms yet. Add one to get started.'),
+              ),
             for (final alarm in items) ...[
               _AlarmTile(
                 alarm: alarm,
-                enabled: _enabledOverrides[alarm.id] ?? alarm.isEnabled,
-                onChanged: (value) => setState(() {
-                  _enabledOverrides[alarm.id] = value;
-                }),
+                onChanged: (value) => _setEnabled(context, ref, alarm, value),
               ),
               const SizedBox(height: 12),
             ],
             const SizedBox(height: 6),
             OutlinedButton.icon(
-              onPressed: () {},
+              onPressed: () => _addAlarm(context, ref),
               icon: const Icon(Icons.add_rounded),
               label: const Text('Add alarm'),
             ),
@@ -67,17 +62,57 @@ class _AlarmsPageState extends ConsumerState<AlarmsPage> {
       ),
     );
   }
+
+  Future<void> _setEnabled(
+    BuildContext context,
+    WidgetRef ref,
+    Alarm alarm,
+    bool enabled,
+  ) async {
+    try {
+      await ref.read(alarmsProvider.notifier).setEnabled(alarm.id, enabled);
+    } on Object {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save this alarm.')),
+      );
+    }
+  }
+
+  Future<void> _addAlarm(BuildContext context, WidgetRef ref) async {
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (time == null || !context.mounted) return;
+
+    final alarm = Alarm(
+      id: 'alarm-${DateTime.now().millisecondsSinceEpoch}',
+      hour: time.hour,
+      minute: time.minute,
+      schedule: 'Every day',
+      sound: 'Gentle piano',
+      isEnabled: true,
+    );
+
+    try {
+      await ref.read(alarmsProvider.notifier).addAlarm(alarm);
+    } on Object {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save this alarm.')),
+      );
+    }
+  }
 }
 
 class _AlarmTile extends StatelessWidget {
   const _AlarmTile({
     required this.alarm,
-    required this.enabled,
     required this.onChanged,
   });
 
   final Alarm alarm;
-  final bool enabled;
   final ValueChanged<bool> onChanged;
 
   @override
@@ -91,7 +126,7 @@ class _AlarmTile extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         subtitle: Text('${alarm.schedule} · ${alarm.sound}'),
-        trailing: Switch(value: enabled, onChanged: onChanged),
+        trailing: Switch(value: alarm.isEnabled, onChanged: onChanged),
       ),
     );
   }
